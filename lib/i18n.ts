@@ -76,6 +76,29 @@ const translations = {
     "categories.products": {
         pt: "produtos", en: "products", es: "productos", fr: "produits",
     },
+    "categories.defaultDesc": {
+        pt: "Explora os melhores produtos digitais e serviços nesta categoria.",
+        en: "Browse the best digital products and services in this category.",
+        es: "Explora os melhores produtos digitales y servicios en esta categoría.",
+        fr: "Explorez les meilleurs produits et services numériques de cette catégorie.",
+    },
+
+    // ─── Featured Products ───
+    "featured.title": {
+        pt: "Produtos em", en: "Featured", es: "Productos en", fr: "Produits en",
+    },
+    "featured.titleAccent": {
+        pt: "Destaque", en: "Products", es: "Destacados", fr: "Vedette",
+    },
+    "featured.subtitle": {
+        pt: "As nossas últimas novidades e produtos mais populares na loja.",
+        en: "Our latest arrivals and most popular products in the shop.",
+        es: "Nuestras últimas novedades y productos más populares en la tienda.",
+        fr: "Nos dernières nouveautés et les produits les plus populaires du magasin.",
+    },
+    "featured.viewAll": {
+        pt: "Ver Todos", en: "View All", es: "Ver Todos", fr: "Voir Tout",
+    },
     // Category names
     "cat.gameAccounts": { pt: "Contas de Jogo", en: "Game Accounts", es: "Cuentas de Juego", fr: "Comptes de Jeu" },
     "cat.gameAccounts.desc": { pt: "Contas premium com itens raros e ranks altos", en: "Premium accounts with rare items and high ranks", es: "Cuentas premium con objetos raros y rangos altos", fr: "Comptes premium avec objets rares et rangs élevés" },
@@ -148,8 +171,8 @@ const translations = {
     "feat.securePayments.desc": { pt: "Todas as transações são processadas pelo Stripe com encriptação ponta-a-ponta e proteção contra fraude.", en: "All transactions are processed through Stripe with end-to-end encryption and fraud protection.", es: "Todas las transacciones se procesan a través de Stripe con encriptación de extremo a extremo y protección contra fraude.", fr: "Toutes les transactions sont traitées via Stripe avec chiffrement de bout en bout et protection contre la fraude." },
     "feat.instantDelivery": { pt: "Entrega Instantânea", en: "Instant Delivery", es: "Entrega Instantánea", fr: "Livraison Instantanée" },
     "feat.instantDelivery.desc": { pt: "Produtos digitais entregues na tua conta instantaneamente após a compra. Sem esperas.", en: "Digital products delivered to your account instantly after purchase. No waiting, no delays.", es: "Productos digitales entregados en tu cuenta instantáneamente después de la compra.", fr: "Produits numériques livrés sur votre compte instantanément après l'achat." },
-    "feat.flexibleSubs": { pt: "Subscrições Flexíveis", en: "Flexible Subscriptions", es: "Suscripciones Flexibles", fr: "Abonnements Flexibles" },
-    "feat.flexibleSubs.desc": { pt: "Cancela ou atualiza o teu plano a qualquer momento. Sem contratos, sem taxas ocultas.", en: "Cancel or upgrade your plan anytime. No contracts, no hidden fees. Full flexibility.", es: "Cancela o actualiza tu plan en cualquier momento. Sin contratos, sin tarifas ocultas.", fr: "Annulez ou mettez à niveau votre plan à tout moment. Pas de contrats, pas de frais cachés." },
+    "feat.flexibleSubs": { pt: "Garantia de Qualidade", en: "Quality Guarantee", es: "Garantía de Calidad", fr: "Garantie de Qualité" },
+    "feat.flexibleSubs.desc": { pt: "Todos os nossos produtos são testados e verificados para garantir que recebes o que pagas. Sem surpresas.", en: "All our products are tested and verified to ensure you get what you pay for. No surprises, just quality.", es: "Todos nuestros productos son probados y verificados para garantizar que recibes lo que pagas.", fr: "Tous nos produits sont testés et vérifiés pour garantir que vous recevez ce que vous payez." },
     "feat.support247": { pt: "Suporte 24/7", en: "24/7 Support", es: "Soporte 24/7", fr: "Support 24/7" },
     "feat.support247.desc": { pt: "Obtém ajuda a qualquer momento através de chat ao vivo, Discord ou email.", en: "Get help anytime through live chat, Discord, or email. Our team is always ready.", es: "Obtén ayuda en cualquier momento a través de chat en vivo, Discord o email.", fr: "Obtenez de l'aide à tout moment via le chat en direct, Discord ou email." },
 
@@ -165,10 +188,10 @@ const translations = {
     },
     "faq.q1": { pt: "O que é a Vinhas.gg?", en: "What is Vinhas.gg?", es: "¿Qué es Vinhas.gg?", fr: "Qu'est-ce que Vinhas.gg ?" },
     "faq.a1": { pt: "A Vinhas.gg é uma plataforma premium de gaming digital onde podes comprar subscrições, produtos de jogo, serviços de boost e mais. Oferecemos transações seguras pelo Stripe e entrega instantânea.", en: "Vinhas.gg is a premium digital gaming platform where you can purchase subscriptions, game products, boosting services, and more. We offer secure transactions through Stripe and instant delivery for all digital products.", es: "Vinhas.gg es una plataforma premium de gaming digital donde puedes comprar suscripciones, productos de juego, servicios de boost y más.", fr: "Vinhas.gg est une plateforme premium de gaming numérique où vous pouvez acheter des abonnements, des produits de jeu, des services de boost et plus encore." },
-    "faq.q2": { pt: "Como funcionam as subscrições?", en: "How do subscriptions work?", es: "¿Cómo funcionan las suscripciones?", fr: "Comment fonctionnent les abonnements ?" },
-    "faq.a2": { pt: "Ao subscreveres um plano, tens acesso imediato aos benefícios. As subscrições são cobradas mensal ou anualmente pelo Stripe. Podes atualizar, fazer downgrade ou cancelar a qualquer momento.", en: "When you subscribe to a plan, you get access to your chosen tier's benefits immediately. Subscriptions are billed monthly or yearly through Stripe. You can upgrade, downgrade, or cancel anytime from your dashboard.", es: "Al suscribirte a un plan, obtienes acceso inmediato a los beneficios. Las suscripciones se cobran mensual o anualmente a través de Stripe.", fr: "Lorsque vous vous abonnez à un plan, vous avez accès immédiatement aux avantages. Les abonnements sont facturés mensuellement ou annuellement via Stripe." },
+    "faq.q2": { pt: "Como funcionam as compras?", en: "How do purchases work?", es: "¿Cómo funcionan las compras?", fr: "Comment fonctionnent les achats ?" },
+    "faq.a2": { pt: "Basta escolheres o produto, finalizar o pagamento via Stripe e receberás o código ou acesso instantaneamente no teu painel. Simples e rápido.", en: "Simply choose the product, complete the payment via Stripe, and you'll receive the code or access instantly in your dashboard. Simple and fast.", es: "Simplemente elige el producto, completa el pago a través de Stripe y recibirás o el código o el acceso al instante.", fr: "Choisissez simplement le produit, validez le paiement via Stripe et vous recevrez le code ou l'accès instantanément." },
     "faq.q3": { pt: "É seguro comprar aqui?", en: "Is it safe to buy here?", es: "¿Es seguro comprar aquí?", fr: "Est-ce sûr d'acheter ici ?" },
-    "faq.a3": { pt: "Absolutamente. Todos os pagamentos são processados pelo Stripe, com segurança e encriptação de nível bancário. Nunca armazenamos os teus dados de pagamento.", en: "Absolutely. All payments are processed through Stripe, which provides bank-level security and encryption. We never store your payment details directly.", es: "Absolutamente. Todos los pagos se procesan a través de Stripe con seguridad y encriptación de nivel bancario.", fr: "Absolument. Tous les paiements sont traités via Stripe avec une sécurité et un chiffrement de niveau bancaire." },
+    "faq.a3": { pt: "Absolutamente. Todos os pagamentos são processados pelo Stripe, com segurança e encriptação de nível bancário. Nunca armazenamos os teus dados de pagamento.", en: "Absolutely. All payments are processed through Stripe, which provides bank-level security and encryption. We never store your payment details directly.", es: "Absolutamente. Todos los pagos se procesan a través de Stripe con seguridad y encriptación de nivel bancário.", fr: "Absolument. Tous les paiements sont traités via Stripe avec une sécurité et un chiffrement de niveau bancaire." },
     "faq.q4": { pt: "Qual a velocidade da entrega?", en: "How fast is delivery?", es: "¿Qué tan rápida es la entrega?", fr: "Quelle est la rapidité de livraison ?" },
     "faq.a4": { pt: "Produtos digitais são entregues instantaneamente após a confirmação do pagamento. Recebes tudo diretamente no teu painel. Para serviços como boost ou coaching, os tempos são indicados em cada produto.", en: "Digital products are delivered instantly after payment confirmation. You'll receive your products directly in your dashboard. For services like boosting or coaching, delivery times are specified on each product page.", es: "Los productos digitales se entregan instantáneamente después de la confirmación del pago.", fr: "Les produits numériques sont livrés instantanément après confirmation du paiement." },
     "faq.q5": { pt: "Posso obter reembolso?", en: "Can I get a refund?", es: "¿Puedo obtener un reembolso?", fr: "Puis-je obtenir un remboursement ?" },

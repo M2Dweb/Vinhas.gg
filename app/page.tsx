@@ -5,6 +5,7 @@ import { LanguageProvider } from "@/components/LanguageProvider";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import CategoriesSection from "@/components/PopularGames";
+import FeaturedProductsSection from "@/components/FeaturedProducts";
 import FeaturesSection from "@/components/WhyVinhas";
 import FAQSection from "@/components/Reviews";
 import Footer from "@/components/Footer";
@@ -19,6 +20,7 @@ export default function Home() {
         <Navbar onLoginClick={() => setAuthOpen(true)} />
         <HeroSection />
         <CategoriesSection />
+        <FeaturedProductsSection />
         <FeaturesSection />
         <FAQSection />
         <Footer />
