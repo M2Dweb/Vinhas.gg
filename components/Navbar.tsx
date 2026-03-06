@@ -27,7 +27,6 @@ export default function Navbar({ onLoginClick }: NavbarProps) {
 
     const navLinks = [
         { name: t("nav.products"), href: "/products" },
-        { name: t("nav.pricing"), href: "/#pricing" },
         { name: t("nav.faq"), href: "/#faq" },
     ];
 

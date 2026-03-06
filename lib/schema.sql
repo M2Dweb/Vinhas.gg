@@ -11,7 +11,9 @@ create extension if not exists "uuid-ossp";
 -- Profiles (must be first — referenced by other tables)
 create table public.profiles (
   id uuid references auth.users(id) on delete cascade primary key,
-  display_name text,
+  full_name text,
+  username text,
+  discord_id text,
   avatar_url text,
   role text not null default 'user' check (role in ('user', 'admin')),
   created_at timestamp with time zone default timezone('utc', now()) not null
@@ -160,10 +162,11 @@ create policy "Admins can update subscriptions" on public.subscriptions
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, display_name, avatar_url)
+  insert into public.profiles (id, full_name, username, avatar_url)
   values (
     new.id,
-    coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
+    new.raw_user_meta_data->>'full_name',
+    coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
     coalesce(new.raw_user_meta_data->>'avatar_url', null)
   );
   return new;
