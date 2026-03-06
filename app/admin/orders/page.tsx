@@ -1,78 +1,127 @@
 "use client";
 
-const orders = [
-    { id: "#VGG-0342", product: "Pro Gaming Plan", customer: "alex@email.com", amount: "€24.99", status: "completed", type: "subscription", date: "Mar 6, 2026" },
-    { id: "#VGG-0341", product: "Fortnite V-Bucks Bundle", customer: "sarah@email.com", amount: "€29.99", status: "completed", type: "one-time", date: "Mar 6, 2026" },
-    { id: "#VGG-0340", product: "Valorant Boost to Diamond", customer: "jake@email.com", amount: "€89.99", status: "pending", type: "one-time", date: "Mar 5, 2026" },
-    { id: "#VGG-0339", product: "Roblox Premium Monthly", customer: "emma@email.com", amount: "€9.99", status: "completed", type: "subscription", date: "Mar 5, 2026" },
-    { id: "#VGG-0338", product: "CS2 Prime Status", customer: "chris@email.com", amount: "€14.99", status: "failed", type: "one-time", date: "Mar 4, 2026" },
-    { id: "#VGG-0337", product: "Elite Coaching Session", customer: "mia@email.com", amount: "€39.99", status: "completed", type: "one-time", date: "Mar 4, 2026" },
-    { id: "#VGG-0336", product: "Pro Gaming Plan", customer: "david@email.com", amount: "€24.99", status: "completed", type: "subscription", date: "Mar 3, 2026" },
-    { id: "#VGG-0335", product: "GTA V Money Package", customer: "lucia@email.com", amount: "€19.99", status: "refunded", type: "one-time", date: "Mar 3, 2026" },
-];
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase";
+import type { Order } from "@/lib/types";
 
 export default function AdminOrdersPage() {
+    const supabase = createClient();
+    const [orders, setOrders] = useState<(Order & { product_name?: string; user_name?: string })[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState("all");
+
+    const fetchOrders = async () => {
+        setLoading(true);
+        let query = supabase.from("orders").select("*").order("created_at", { ascending: false });
+        if (filter !== "all") query = query.eq("status", filter);
+        const { data } = await query;
+
+        if (data) {
+            // Enrich with product and user names
+            const productIds = [...new Set(data.map((o) => o.product_id))];
+            const userIds = [...new Set(data.map((o) => o.user_id))];
+
+            const [{ data: products }, { data: profiles }] = await Promise.all([
+                supabase.from("products").select("id, name").in("id", productIds),
+                supabase.from("profiles").select("id, display_name").in("id", userIds),
+            ]);
+
+            const productMap = Object.fromEntries((products || []).map((p) => [p.id, p.name]));
+            const userMap = Object.fromEntries((profiles || []).map((p) => [p.id, p.display_name || "—"]));
+
+            setOrders(data.map((o) => ({
+                ...o,
+                product_name: productMap[o.product_id] || "—",
+                user_name: userMap[o.user_id] || "—",
+            })));
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => { fetchOrders(); }, [filter]);
+
+    const updateStatus = async (id: string, status: string) => {
+        await supabase.from("orders").update({ status }).eq("id", id);
+        fetchOrders();
+    };
+
+    const filters = ["all", "pending", "completed", "failed", "refunded"];
+
     return (
         <div>
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-white tracking-tight">Orders</h1>
-                <p className="text-sm text-[var(--text-tertiary)] mt-1">{orders.length} total orders</p>
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h1 className="text-2xl font-bold text-white tracking-tight">Encomendas</h1>
+                    <p className="text-sm text-[var(--text-tertiary)] mt-1">{orders.length} encomendas</p>
+                </div>
             </div>
 
-            {/* Filters */}
             <div className="flex flex-wrap gap-2 mb-6">
-                {["All", "Completed", "Pending", "Failed", "Refunded"].map((f) => (
+                {filters.map((f) => (
                     <button
                         key={f}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${f === "All"
+                        onClick={() => setFilter(f)}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${filter === f
                                 ? "bg-[var(--accent)] text-white"
                                 : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--border-hover)]"
                             }`}
                     >
-                        {f}
+                        {f === "all" ? "Todas" : f === "pending" ? "Pendente" : f === "completed" ? "Completa" : f === "failed" ? "Falhada" : "Reembolsada"}
                     </button>
                 ))}
             </div>
 
-            {/* Table */}
             <div className="card-static overflow-hidden">
-                <table className="w-full">
-                    <thead>
-                        <tr className="border-b border-[var(--border)]">
-                            <th className="text-left text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider p-4">Order ID</th>
-                            <th className="text-left text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider p-4">Product</th>
-                            <th className="text-left text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider p-4 hidden md:table-cell">Customer</th>
-                            <th className="text-left text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider p-4">Amount</th>
-                            <th className="text-left text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider p-4">Type</th>
-                            <th className="text-left text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider p-4">Status</th>
-                            <th className="text-left text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider p-4 hidden lg:table-cell">Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {orders.map((order) => (
-                            <tr key={order.id} className="table-row border-b border-[var(--border)] last:border-0">
-                                <td className="p-4 text-sm text-[var(--text-secondary)] font-mono">{order.id}</td>
-                                <td className="p-4 text-sm text-white font-medium">{order.product}</td>
-                                <td className="p-4 text-sm text-[var(--text-tertiary)] hidden md:table-cell">{order.customer}</td>
-                                <td className="p-4 text-sm text-white font-medium">{order.amount}</td>
-                                <td className="p-4">
-                                    <span className={`badge text-[11px] ${order.type === "subscription" ? "badge-accent" : "badge-neutral"}`}>
-                                        {order.type === "subscription" ? "Sub" : "One-time"}
-                                    </span>
-                                </td>
-                                <td className="p-4">
-                                    <span className={`badge text-[11px] ${order.status === "completed" ? "badge-success" :
-                                            order.status === "pending" ? "badge-warning" :
-                                                order.status === "refunded" ? "badge-neutral" : "badge-danger"
-                                        }`}>
-                                        {order.status}
-                                    </span>
-                                </td>
-                                <td className="p-4 text-sm text-[var(--text-tertiary)] hidden lg:table-cell">{order.date}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                {loading ? (
+                    <div className="p-12 text-center text-[var(--text-tertiary)]">A carregar...</div>
+                ) : orders.length === 0 ? (
+                    <div className="p-12 text-center text-[var(--text-tertiary)]">Nenhuma encomenda encontrada.</div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[600px]">
+                            <thead>
+                                <tr className="border-b border-[var(--border)]">
+                                    <th className="text-left text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider p-4">Produto</th>
+                                    <th className="text-left text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider p-4">Utilizador</th>
+                                    <th className="text-left text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider p-4">Valor</th>
+                                    <th className="text-left text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider p-4">Estado</th>
+                                    <th className="text-left text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider p-4">Data</th>
+                                    <th className="text-right text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider p-4">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {orders.map((o) => (
+                                    <tr key={o.id} className="table-row border-b border-[var(--border)] last:border-0">
+                                        <td className="p-4 text-sm text-white font-medium">{o.product_name}</td>
+                                        <td className="p-4 text-sm text-[var(--text-secondary)]">{o.user_name}</td>
+                                        <td className="p-4 text-sm text-white font-medium">€{Number(o.amount).toFixed(2)}</td>
+                                        <td className="p-4">
+                                            <span className={`badge text-[11px] ${o.status === "completed" ? "badge-success" :
+                                                    o.status === "pending" ? "badge-warning" :
+                                                        o.status === "refunded" ? "badge-accent" : "badge-danger"
+                                                }`}>{o.status}</span>
+                                        </td>
+                                        <td className="p-4 text-sm text-[var(--text-tertiary)]">
+                                            {new Date(o.created_at).toLocaleDateString("pt-PT")}
+                                        </td>
+                                        <td className="p-4 text-right">
+                                            <select
+                                                value={o.status}
+                                                onChange={(e) => updateStatus(o.id, e.target.value)}
+                                                className="select text-xs py-1 px-2 w-auto"
+                                            >
+                                                <option value="pending">Pendente</option>
+                                                <option value="completed">Completa</option>
+                                                <option value="failed">Falhada</option>
+                                                <option value="refunded">Reembolsada</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
         </div>
     );

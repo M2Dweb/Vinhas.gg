@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/components/LanguageProvider";
+import { createClient } from "@/lib/supabase";
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -11,7 +12,58 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     const [mode, setMode] = useState<"login" | "register">("login");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [form, setForm] = useState({ email: "", password: "", username: "" });
     const { t } = useLanguage();
+
+    const supabase = createClient();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            if (mode === "login") {
+                const { error } = await supabase.auth.signInWithPassword({
+                    email: form.email,
+                    password: form.password,
+                });
+                if (error) throw error;
+            } else {
+                const { error } = await supabase.auth.signUp({
+                    email: form.email,
+                    password: form.password,
+                    options: {
+                        data: { full_name: form.username },
+                    },
+                });
+                if (error) throw error;
+            }
+            onClose();
+            window.location.reload();
+        } catch (err: any) {
+            setError(err.message || "Something went wrong");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleOAuth = async (provider: "google" | "discord") => {
+        setLoading(true);
+        setError(null);
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider,
+                options: { redirectTo: `${window.location.origin}/` },
+            });
+            if (error) throw error;
+        } catch (err: any) {
+            setError(err.message || "Something went wrong");
+            setLoading(false);
+        }
+    };
 
     return (
         <AnimatePresence>
@@ -49,8 +101,18 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                             </p>
                         </div>
 
+                        {error && (
+                            <div className="mb-4 p-3 rounded-xl bg-[rgba(239,68,68,0.06)] border border-[rgba(239,68,68,0.2)] text-sm text-[var(--danger)]">
+                                {error}
+                            </div>
+                        )}
+
                         <div className="flex gap-2.5 mb-5">
-                            <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-secondary)] bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border-hover)] hover:bg-[var(--surface)] transition-all">
+                            <button
+                                onClick={() => handleOAuth("google")}
+                                disabled={loading}
+                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-secondary)] bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border-hover)] hover:bg-[var(--surface)] transition-all disabled:opacity-50"
+                            >
                                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                                     <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
                                     <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -59,7 +121,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                 </svg>
                                 Google
                             </button>
-                            <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-secondary)] bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border-hover)] hover:bg-[var(--surface)] transition-all">
+                            <button
+                                onClick={() => handleOAuth("discord")}
+                                disabled={loading}
+                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-secondary)] bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border-hover)] hover:bg-[var(--surface)] transition-all disabled:opacity-50"
+                            >
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z" />
                                 </svg>
@@ -73,30 +139,55 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                             <div className="flex-1 h-px bg-[var(--border)]" />
                         </div>
 
-                        <form className="space-y-3.5" onSubmit={(e) => e.preventDefault()}>
+                        <form className="space-y-3.5" onSubmit={handleSubmit}>
                             {mode === "register" && (
                                 <div>
                                     <label className="label">{t("auth.username")}</label>
-                                    <input type="text" placeholder={t("auth.username")} className="input" />
+                                    <input
+                                        type="text"
+                                        value={form.username}
+                                        onChange={(e) => setForm({ ...form, username: e.target.value })}
+                                        placeholder={t("auth.username")}
+                                        className="input"
+                                    />
                                 </div>
                             )}
                             <div>
                                 <label className="label">{t("auth.email")}</label>
-                                <input type="email" placeholder="you@example.com" className="input" />
+                                <input
+                                    type="email"
+                                    value={form.email}
+                                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                    placeholder="you@example.com"
+                                    className="input"
+                                    required
+                                />
                             </div>
                             <div>
                                 <label className="label">{t("auth.password")}</label>
-                                <input type="password" placeholder="••••••••" className="input" />
+                                <input
+                                    type="password"
+                                    value={form.password}
+                                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                                    placeholder="••••••••"
+                                    className="input"
+                                    required
+                                    minLength={6}
+                                />
                             </div>
-                            <button type="submit" className="btn-primary w-full py-2.5 mt-1">
-                                {mode === "login" ? t("auth.signIn") : t("auth.createAccount")}
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="btn-primary w-full py-2.5 mt-1 disabled:opacity-50"
+                            >
+                                {loading ? "..." : mode === "login" ? t("auth.signIn") : t("auth.createAccount")}
                             </button>
                         </form>
 
                         <p className="text-center text-sm text-[var(--text-tertiary)] mt-5">
                             {mode === "login" ? t("auth.noAccount") : t("auth.hasAccount")}{" "}
                             <button
-                                onClick={() => setMode(mode === "login" ? "register" : "login")}
+                                onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(null); }}
                                 className="text-[var(--accent)] font-medium hover:text-[var(--accent-hover)] transition-colors"
                             >
                                 {mode === "login" ? t("auth.signUp") : t("auth.signIn")}
