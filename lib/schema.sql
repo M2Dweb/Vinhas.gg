@@ -80,12 +80,29 @@ alter table public.orders enable row level security;
 alter table public.subscriptions enable row level security;
 
 -- ═══════════════════════════════════════
--- STEP 3: Create all policies
+-- STEP 3: Create security definer function for role checks
+-- ═══════════════════════════════════════
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from profiles
+    where id = auth.uid() and role = 'admin'
+  );
+$$;
+
+-- ═══════════════════════════════════════
+-- STEP 4: Create all policies
 -- ═══════════════════════════════════════
 
 -- Profiles policies
 create policy "Users can view their own profile" on public.profiles
-  for select using (auth.uid() = id or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'));
+  for select using (auth.uid() = id or public.is_admin());
 
 create policy "Users can update their own profile" on public.profiles
   for update using (auth.uid() = id);
@@ -98,65 +115,49 @@ create policy "Categories are viewable by everyone" on public.categories
   for select using (true);
 
 create policy "Only admins can insert categories" on public.categories
-  for insert with check (
-    exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
-  );
+  for insert with check (public.is_admin());
 
 create policy "Only admins can update categories" on public.categories
-  for update using (
-    exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
-  );
+  for update using (public.is_admin());
 
 create policy "Only admins can delete categories" on public.categories
-  for delete using (
-    exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
-  );
+  for delete using (public.is_admin());
 
 -- Products policies
 create policy "Active products are viewable by everyone" on public.products
-  for select using (active = true or exists (select 1 from public.profiles where id = auth.uid() and role = 'admin'));
+  for select using (active = true or public.is_admin());
 
 create policy "Only admins can insert products" on public.products
-  for insert with check (
-    exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
-  );
+  for insert with check (public.is_admin());
 
 create policy "Only admins can update products" on public.products
-  for update using (
-    exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
-  );
+  for update using (public.is_admin());
 
 create policy "Only admins can delete products" on public.products
-  for delete using (
-    exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
-  );
+  for delete using (public.is_admin());
 
 -- Orders policies
 create policy "Users can view their own orders" on public.orders
-  for select using (auth.uid() = user_id or exists (select 1 from public.profiles where id = auth.uid() and role = 'admin'));
+  for select using (auth.uid() = user_id or public.is_admin());
 
 create policy "Orders can be inserted by authenticated users" on public.orders
   for insert with check (auth.uid() = user_id);
 
 create policy "Only admins can update orders" on public.orders
-  for update using (
-    exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
-  );
+  for update using (public.is_admin());
 
 -- Subscriptions policies
 create policy "Users can view their own subscriptions" on public.subscriptions
-  for select using (auth.uid() = user_id or exists (select 1 from public.profiles where id = auth.uid() and role = 'admin'));
+  for select using (auth.uid() = user_id or public.is_admin());
 
 create policy "Subscriptions can be inserted for authenticated users" on public.subscriptions
   for insert with check (auth.uid() = user_id);
 
 create policy "Admins can update subscriptions" on public.subscriptions
-  for update using (
-    exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
-  );
+  for update using (public.is_admin());
 
 -- ═══════════════════════════════════════
--- STEP 4: Auto-create profile on signup
+-- STEP 5: Auto-create profile on signup
 -- ═══════════════════════════════════════
 
 create or replace function public.handle_new_user()
