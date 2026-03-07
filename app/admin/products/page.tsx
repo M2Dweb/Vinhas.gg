@@ -14,7 +14,7 @@ export default function AdminProductsPage() {
     const [editing, setEditing] = useState<Product | null>(null);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState({
-        name: "", slug: "", description: "", price: "", category_id: "", type: "one-time" as "one-time" | "subscription", interval: "" as string, active: true,
+        name: "", slug: "", description: "", price: "", category_id: "", type: "one-time" as "one-time" | "subscription", interval: "" as string, active: true, image_url: ""
     });
 
     const fetchData = async () => {
@@ -36,7 +36,7 @@ export default function AdminProductsPage() {
 
     const openCreate = () => {
         setEditing(null);
-        setForm({ name: "", slug: "", description: "", price: "", category_id: categories[0]?.id || "", type: "one-time", interval: "", active: true });
+        setForm({ name: "", slug: "", description: "", price: "", category_id: categories[0]?.id || "", type: "one-time", interval: "", active: true, image_url: "" });
         setModalOpen(true);
     };
 
@@ -44,7 +44,7 @@ export default function AdminProductsPage() {
         setEditing(p);
         setForm({
             name: p.name, slug: p.slug, description: p.description || "", price: String(p.price),
-            category_id: p.category_id, type: p.type, interval: p.interval || "", active: p.active,
+            category_id: p.category_id, type: p.type, interval: p.interval || "", active: p.active, image_url: p.image_url || ""
         });
         setModalOpen(true);
     };
@@ -60,6 +60,7 @@ export default function AdminProductsPage() {
             type: form.type,
             interval: form.type === "subscription" ? (form.interval || "monthly") : null,
             active: form.active,
+            image_url: form.image_url,
         };
 
         if (editing) {
@@ -176,6 +177,10 @@ export default function AdminProductsPage() {
                                     <div>
                                         <label className="label">Slug</label>
                                         <input type="text" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="input font-mono text-sm" />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className="label">URL da Imagem</label>
+                                        <input type="text" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://exemplo.com/imagem.jpg" className="input text-sm" />
                                     </div>
                                     <div>
                                         <label className="label">Categoria</label>

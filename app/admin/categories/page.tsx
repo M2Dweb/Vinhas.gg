@@ -12,7 +12,7 @@ export default function AdminCategoriesPage() {
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<Category | null>(null);
     const [saving, setSaving] = useState(false);
-    const [form, setForm] = useState({ name: "", slug: "", description: "" });
+    const [form, setForm] = useState({ name: "", slug: "", description: "", image_url: "" });
 
     const fetchCategories = async () => {
         setLoading(true);
@@ -41,13 +41,13 @@ export default function AdminCategoriesPage() {
 
     const openCreate = () => {
         setEditing(null);
-        setForm({ name: "", slug: "", description: "" });
+        setForm({ name: "", slug: "", description: "", image_url: "" });
         setModalOpen(true);
     };
 
     const openEdit = (cat: Category) => {
         setEditing(cat);
-        setForm({ name: cat.name, slug: cat.slug, description: cat.description || "" });
+        setForm({ name: cat.name, slug: cat.slug, description: cat.description || "", image_url: cat.image_url || "" });
         setModalOpen(true);
     };
 
@@ -58,12 +58,14 @@ export default function AdminCategoriesPage() {
                 name: form.name,
                 slug: form.slug,
                 description: form.description,
+                image_url: form.image_url,
             }).eq("id", editing.id);
         } else {
             await supabase.from("categories").insert({
                 name: form.name,
                 slug: form.slug,
                 description: form.description,
+                image_url: form.image_url,
                 order: categories.length,
             });
         }
@@ -159,6 +161,10 @@ export default function AdminCategoriesPage() {
                                 <div>
                                     <label className="label">Slug</label>
                                     <input type="text" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="ex: spotify-premium" className="input font-mono text-sm" />
+                                </div>
+                                <div>
+                                    <label className="label">URL da Imagem</label>
+                                    <input type="text" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://exemplo.com/imagem.jpg" className="input text-sm" />
                                 </div>
                                 <div>
                                     <label className="label">Descrição</label>

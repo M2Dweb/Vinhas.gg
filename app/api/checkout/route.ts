@@ -16,10 +16,32 @@ export async function POST(req: NextRequest) {
         const hasSubscription = items.some((item: any) => item.type === "subscription");
         const mode = hasSubscription ? "subscription" : "payment";
 
-        const line_items = items.map((item: any) => ({
-            price: item.priceId,
-            quantity: item.quantity,
-        }));
+        const line_items = items.map((item: any) => {
+            if (item.priceId) {
+                return {
+                    price: item.priceId,
+                    quantity: item.quantity,
+                };
+            } else {
+                return {
+                    price_data: {
+                        currency: "eur",
+                        product_data: {
+                            name: item.name,
+                        },
+                        unit_amount: Math.round(item.amount * 100),
+                        recurring:
+                            item.type === "subscription"
+                                ? {
+                                    interval:
+                                        item.interval === "yearly" ? "year" : "month",
+                                }
+                                : undefined,
+                    },
+                    quantity: item.quantity,
+                };
+            }
+        });
 
         const session = await stripe.checkout.sessions.create({
             mode,

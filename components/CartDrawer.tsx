@@ -25,7 +25,10 @@ export default function CartDrawer() {
                         priceId: item.product.stripe_price_id,
                         productId: item.product.id,
                         quantity: item.quantity,
-                        type: item.product.type
+                        type: item.product.type,
+                        amount: item.product.price,
+                        name: item.product.name,
+                        interval: item.product.interval
                     }))
                 }),
             });
