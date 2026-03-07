@@ -166,6 +166,32 @@ export interface Database {
                     created_at?: string;
                 };
             };
+            order_messages: {
+                Row: {
+                    id: string;
+                    order_id: string;
+                    user_id: string;
+                    message: string;
+                    is_admin_reply: boolean;
+                    created_at: string;
+                };
+                Insert: {
+                    id?: string;
+                    order_id: string;
+                    user_id: string;
+                    message: string;
+                    is_admin_reply?: boolean;
+                    created_at?: string;
+                };
+                Update: {
+                    id?: string;
+                    order_id?: string;
+                    user_id?: string;
+                    message?: string;
+                    is_admin_reply?: boolean;
+                    created_at?: string;
+                };
+            };
         };
     };
 }
@@ -176,3 +202,4 @@ export type Product = Database["public"]["Tables"]["products"]["Row"];
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Order = Database["public"]["Tables"]["orders"]["Row"];
 export type Subscription = Database["public"]["Tables"]["subscriptions"]["Row"];
+export type OrderMessage = Database["public"]["Tables"]["order_messages"]["Row"];

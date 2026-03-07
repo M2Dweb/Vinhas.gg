@@ -69,6 +69,16 @@ create table public.subscriptions (
   created_at timestamp with time zone default timezone('utc', now()) not null
 );
 
+-- Order Messages (Chat System)
+create table public.order_messages (
+  id uuid default uuid_generate_v4() primary key,
+  order_id uuid references public.orders(id) on delete cascade not null,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  message text not null,
+  is_admin_reply boolean default false,
+  created_at timestamp with time zone default timezone('utc', now()) not null
+);
+
 -- ═══════════════════════════════════════
 -- STEP 2: Enable RLS on all tables
 -- ═══════════════════════════════════════
@@ -78,6 +88,7 @@ alter table public.categories enable row level security;
 alter table public.products enable row level security;
 alter table public.orders enable row level security;
 alter table public.subscriptions enable row level security;
+alter table public.order_messages enable row level security;
 
 -- ═══════════════════════════════════════
 -- STEP 3: Create security definer function for role checks
@@ -145,6 +156,19 @@ create policy "Orders can be inserted by authenticated users" on public.orders
 
 create policy "Only admins can update orders" on public.orders
   for update using (public.is_admin());
+
+-- Order Messages policies
+create policy "Users can view messages for their orders" on public.order_messages
+  for select using (
+    public.is_admin() or 
+    exists (select 1 from public.orders where id = order_messages.order_id and user_id = auth.uid())
+  );
+
+create policy "Users can insert messages to their orders" on public.order_messages
+  for insert with check (
+    public.is_admin() or 
+    (auth.uid() = user_id and exists (select 1 from public.orders where id = order_messages.order_id and user_id = auth.uid()))
+  );
 
 -- Subscriptions policies
 create policy "Users can view their own subscriptions" on public.subscriptions
