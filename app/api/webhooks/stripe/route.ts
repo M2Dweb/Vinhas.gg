@@ -41,30 +41,45 @@ export async function POST(req: NextRequest) {
         switch (event.type) {
             case "checkout.session.completed": {
                 const session = event.data.object as Stripe.Checkout.Session;
-                const { userId, productId } = session.metadata || {};
+                const { userId, productId, cartData } = session.metadata || {};
 
-                console.log("✅ Checkout completed:", { sessionId: session.id, userId, productId });
+                console.log("✅ Checkout completed:", { sessionId: session.id, userId, productId, cartData });
 
-                if (userId && productId) {
-                    await supabase.from("orders").insert({
-                        user_id: userId,
-                        product_id: productId,
-                        stripe_session_id: session.id,
-                        status: "completed",
-                        amount: session.amount_total ? session.amount_total / 100 : 0
-                    });
+                if (userId) {
+                    let products: { id: string; type: string }[] = [];
+                    if (cartData) {
+                        try {
+                            products = JSON.parse(cartData);
+                        } catch (e) {
+                            console.error("Failed to parse cartData", e);
+                        }
+                    } else if (productId) {
+                        products = [{ id: productId, type: session.mode === 'subscription' ? 'subscription' : 'one-time' }];
+                    }
 
-                    if (session.mode === "subscription" && session.subscription) {
-                        const subscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription.id;
-                        const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
+                    if (products.length > 0) {
+                        for (const prod of products) {
+                            await supabase.from("orders").insert({
+                                user_id: userId,
+                                product_id: prod.id,
+                                stripe_session_id: session.id,
+                                status: "completed",
+                                amount: (session.amount_total ? session.amount_total / 100 : 0) / products.length
+                            });
 
-                        await supabase.from("subscriptions").insert({
-                            user_id: userId,
-                            product_id: productId,
-                            stripe_subscription_id: subscription.id,
-                            status: subscription.status,
-                            current_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
-                        });
+                            if (prod.type === "subscription" && session.subscription) {
+                                const subscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription.id;
+                                const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
+
+                                await supabase.from("subscriptions").insert({
+                                    user_id: userId,
+                                    product_id: prod.id,
+                                    stripe_subscription_id: subscription.id,
+                                    status: subscription.status,
+                                    current_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
+                                });
+                            }
+                        }
                     }
                 }
                 break;

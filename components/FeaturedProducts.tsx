@@ -5,11 +5,13 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/components/LanguageProvider";
+import { useCart } from "@/components/CartProvider";
 import { createClient } from "@/lib/supabase";
 import type { Product } from "@/lib/types";
 
 export default function FeaturedProductsSection() {
     const { t } = useLanguage();
+    const { addToCart } = useCart();
     const supabase = createClient();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
@@ -116,9 +118,16 @@ export default function FeaturedProductsSection() {
                                             {product.description}
                                         </p>
 
-                                        <div className="btn-primary w-full py-2.5 rounded-xl text-xs font-bold group-hover:shadow-[0_0_20px_rgba(124,58,237,0.3)] transition-all">
-                                            {t("products.buyNow")}
-                                        </div>
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                addToCart(product);
+                                            }}
+                                            className="btn-primary w-full py-2.5 rounded-xl text-xs font-bold group-hover:shadow-[0_0_20px_rgba(124,58,237,0.3)] transition-all"
+                                        >
+                                            Adicionar ao Carrinho
+                                        </button>
                                     </div>
                                 </div>
                             </Link>

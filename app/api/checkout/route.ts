@@ -4,27 +4,36 @@ import { getStripe } from "@/lib/stripe";
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { priceId, mode, userId, productId } = body;
+        const { items, userId } = body;
 
-        if (!priceId) {
-            return NextResponse.json({ error: "Price ID is required" }, { status: 400 });
+        if (!items || items.length === 0) {
+            return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
         }
 
         const stripe = getStripe();
+
+        // Check if any item is a subscription
+        const hasSubscription = items.some((item: any) => item.type === "subscription");
+        const mode = hasSubscription ? "subscription" : "payment";
+
+        const line_items = items.map((item: any) => ({
+            price: item.priceId,
+            quantity: item.quantity,
+        }));
+
         const session = await stripe.checkout.sessions.create({
-            mode: mode === "subscription" ? "subscription" : "payment",
+            mode,
             payment_method_types: ["card"],
-            line_items: [
-                {
-                    price: priceId,
-                    quantity: 1,
-                },
-            ],
+            line_items,
             success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/products`,
             metadata: {
                 userId: userId || "",
-                productId: productId || "",
+                // Store a simplified JSON summary of the cart to process orders in the webhook
+                cartData: JSON.stringify(items.map((i: any) => ({
+                    id: i.productId,
+                    type: i.type,
+                }))).slice(0, 500), // Stripe limit is 500 chars for metadata values
             },
         });
 

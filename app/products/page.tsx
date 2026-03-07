@@ -6,11 +6,13 @@ import { LanguageProvider, useLanguage } from "@/components/LanguageProvider";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AuthModal from "@/components/AuthModal";
+import { useCart } from "@/components/CartProvider";
 import { createClient } from "@/lib/supabase";
 import type { Product, Category } from "@/lib/types";
 
 function ProductsContent() {
     const { t } = useLanguage();
+    const { addToCart } = useCart();
     const supabase = createClient();
     const [authOpen, setAuthOpen] = useState(false);
     const [products, setProducts] = useState<(Product & { category_name: string; category_slug: string })[]>([]);
@@ -47,25 +49,6 @@ function ProductsContent() {
         return matchCat && matchSearch;
     });
 
-    const handleCheckout = async (product: Product) => {
-        try {
-            const res = await fetch("/api/checkout", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    priceId: product.stripe_price_id,
-                    productName: product.name,
-                    amount: product.price,
-                    type: product.type,
-                }),
-            });
-            const data = await res.json();
-            if (data.url) window.location.href = data.url;
-        } catch (err) {
-            console.error("Checkout error:", err);
-        }
-    };
-
     return (
         <main className="min-h-screen">
             <Navbar onLoginClick={() => setAuthOpen(true)} />
@@ -92,8 +75,8 @@ function ProductsContent() {
                         <button
                             onClick={() => setSelectedCategory("all")}
                             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${selectedCategory === "all"
-                                    ? "bg-[var(--accent)] text-white"
-                                    : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--border-hover)]"
+                                ? "bg-[var(--accent)] text-white"
+                                : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--border-hover)]"
                                 }`}
                         >
                             {t("products.all")}
@@ -103,8 +86,8 @@ function ProductsContent() {
                                 key={cat.id}
                                 onClick={() => setSelectedCategory(cat.slug)}
                                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${selectedCategory === cat.slug
-                                        ? "bg-[var(--accent)] text-white"
-                                        : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--border-hover)]"
+                                    ? "bg-[var(--accent)] text-white"
+                                    : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--border-hover)]"
                                     }`}
                             >
                                 {cat.name}
@@ -165,8 +148,15 @@ function ProductsContent() {
                                                             <span className="text-sm text-[var(--text-tertiary)]">/{product.interval === "monthly" ? "mês" : "ano"}</span>
                                                         )}
                                                     </div>
-                                                    <button onClick={() => handleCheckout(product)} className="btn-primary py-2 px-5 text-[13px]">
-                                                        {product.type === "subscription" ? t("products.subscribe") : t("products.buyNow")}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            addToCart(product);
+                                                        }}
+                                                        className="btn-primary py-2 px-5 text-[13px]"
+                                                    >
+                                                        Adicionar
                                                     </button>
                                                 </div>
                                             </div>
