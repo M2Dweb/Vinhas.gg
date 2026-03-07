@@ -12,7 +12,8 @@ function SuccessContent() {
 
     useEffect(() => {
         clearCart();
-    }, [clearCart]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <main className="min-h-screen flex items-center justify-center px-6">
