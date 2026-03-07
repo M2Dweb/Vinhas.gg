@@ -107,7 +107,7 @@ function DashboardContent() {
 
     const handleCancelSub = async () => {
         // In a real app, this would call an API route to cancel the Stripe subscription
-        alert("Para cancelar a subscrição, por favor entra em contacto via Discord.");
+        alert("Para cancelar a subscrição, por favor entra em contacto via Discord: https://discord.gg/4uYH9CtjQt");
     };
 
     const sidebarLinks = [
@@ -209,9 +209,12 @@ function DashboardContent() {
                                                                         </span>
                                                                     </td>
                                                                     <td className="p-4 text-sm text-[var(--text-tertiary)] hidden md:table-cell">{p.date}</td>
-                                                                    <td className="p-4 text-right">
+                                                                    <td className="p-4 text-right flex flex-col items-end gap-2">
+                                                                        <Link href={`/dashboard/orders/${p.id}`} className="text-xs font-bold text-white bg-[var(--surface-hover)] border border-[var(--border)] px-3 py-1.5 rounded-lg hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
+                                                                            Detalhes
+                                                                        </Link>
                                                                         {p.type === "subscription" && p.status === "active" && (
-                                                                            <button onClick={handleCancelSub} className="text-xs text-[var(--danger)] hover:text-red-300 font-medium transition-colors">
+                                                                            <button onClick={handleCancelSub} className="text-[10px] text-[var(--text-tertiary)] hover:text-red-400 transition-colors mt-1">
                                                                                 {t("dashboard.cancel")}
                                                                             </button>
                                                                         )}

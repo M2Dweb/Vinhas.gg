@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import type { Order } from "@/lib/types";
+import Link from "next/link";
 
 export default function AdminOrdersPage() {
     const supabase = createClient();
@@ -62,8 +63,8 @@ export default function AdminOrdersPage() {
                         key={f}
                         onClick={() => setFilter(f)}
                         className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${filter === f
-                                ? "bg-[var(--accent)] text-white"
-                                : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--border-hover)]"
+                            ? "bg-[var(--accent)] text-white"
+                            : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--border-hover)]"
                             }`}
                     >
                         {f === "all" ? "Todas" : f === "pending" ? "Pendente" : f === "completed" ? "Completa" : f === "failed" ? "Falhada" : "Reembolsada"}
@@ -97,24 +98,31 @@ export default function AdminOrdersPage() {
                                         <td className="p-4 text-sm text-white font-medium">€{Number(o.amount).toFixed(2)}</td>
                                         <td className="p-4">
                                             <span className={`badge text-[11px] ${o.status === "completed" ? "badge-success" :
-                                                    o.status === "pending" ? "badge-warning" :
-                                                        o.status === "refunded" ? "badge-accent" : "badge-danger"
+                                                o.status === "pending" ? "badge-warning" :
+                                                    o.status === "refunded" ? "badge-accent" : "badge-danger"
                                                 }`}>{o.status}</span>
                                         </td>
                                         <td className="p-4 text-sm text-[var(--text-tertiary)]">
                                             {new Date(o.created_at).toLocaleDateString("pt-PT")}
                                         </td>
                                         <td className="p-4 text-right">
-                                            <select
-                                                value={o.status}
-                                                onChange={(e) => updateStatus(o.id, e.target.value)}
-                                                className="select text-xs py-1 px-2 w-auto"
-                                            >
-                                                <option value="pending">Pendente</option>
-                                                <option value="completed">Completa</option>
-                                                <option value="failed">Falhada</option>
-                                                <option value="refunded">Reembolsada</option>
-                                            </select>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <select
+                                                    value={o.status}
+                                                    onChange={(e) => updateStatus(o.id, e.target.value)}
+                                                    className="select text-xs py-1 px-2 w-auto"
+                                                >
+                                                    <option value="pending">Pendente</option>
+                                                    <option value="completed">Completa</option>
+                                                    <option value="failed">Falhada</option>
+                                                    <option value="refunded">Reembolsada</option>
+                                                </select>
+                                                <Link href={`/admin/orders/${o.id}`} className="p-1.5 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-white hover:border-[var(--accent)] transition-all">
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                                    </svg>
+                                                </Link>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
