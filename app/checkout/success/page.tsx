@@ -1,11 +1,18 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { LanguageProvider, useLanguage } from "@/components/LanguageProvider";
+import { useCart } from "@/components/CartProvider";
 
 function SuccessContent() {
     const { t } = useLanguage();
+    const { clearCart } = useCart();
+
+    useEffect(() => {
+        clearCart();
+    }, [clearCart]);
 
     return (
         <main className="min-h-screen flex items-center justify-center px-6">
